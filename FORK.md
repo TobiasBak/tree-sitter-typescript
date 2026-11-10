@@ -28,4 +28,4 @@ tree-sitter test
 (cd tsx && tree-sitter test)
 ```
 
-ABI 14 matches the parsers upstream ships. Regenerating the unmodified `v0.23.2` grammar this way yields the same trees as the released parsers on 4,834 TypeScript and TSX files from 35 repositories; the fixes changed trees only in files that contain the constructs above.
+ABI 14 matches the parsers upstream ships. Regenerating the unmodified `v0.23.2` grammar this way yields the same trees as the released parsers on 4,834 TypeScript and TSX files from 19 repositories; the fixes changed trees only in files that contain the constructs above.
