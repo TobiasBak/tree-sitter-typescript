@@ -2214,3 +2214,43 @@ import something from 'foo.css' assert { type: 'css' }
           (property_identifier)
           (string
             (string_fragment)))))))
+
+================================================================================
+Variance annotations on type parameters
+================================================================================
+
+interface A<in T, out U, in out V = unknown> {}
+type B<out T> = () => T;
+class C<const T, in U> {}
+
+--------------------------------------------------------------------------------
+
+(program
+  (interface_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier))
+      (type_parameter
+        (type_identifier))
+      (type_parameter
+        (type_identifier)
+        (default_type
+          (predefined_type))))
+    (interface_body))
+  (type_alias_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (function_type
+      (formal_parameters)
+      (type_identifier)))
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier))
+      (type_parameter
+        (type_identifier)))
+    (class_body)))

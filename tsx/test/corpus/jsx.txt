@@ -1,0 +1,24 @@
+================================================================================
+Ampersands in JSX attribute strings
+================================================================================
+
+<a href="https://example.com?a=1&b=2" title='x & y &amp; z' />;
+
+--------------------------------------------------------------------------------
+
+(program
+  (expression_statement
+    (jsx_self_closing_element
+      (identifier)
+      (jsx_attribute
+        (property_identifier)
+        (string
+          (string_fragment)
+          (string_fragment)
+          (string_fragment)))
+      (jsx_attribute
+        (property_identifier)
+        (string
+          (string_fragment)
+          (html_character_reference)
+          (string_fragment))))))

@@ -424,3 +424,148 @@ a ? function(){ return true } : b;
           (return_statement
             (true))))
       (identifier))))
+
+================================================================================
+Generic calls with import type queries as type arguments
+================================================================================
+
+f<typeof import("./x")>();
+a.b<typeof import("./x")>(c);
+const m = b < import("./x").c;
+
+--------------------------------------------------------------------------------
+
+(program
+  (expression_statement
+    (call_expression
+      (identifier)
+      (type_arguments
+        (type_query
+          (call_expression
+            (import)
+            (arguments
+              (string
+                (string_fragment))))))
+      (arguments)))
+  (expression_statement
+    (call_expression
+      (member_expression
+        (identifier)
+        (property_identifier))
+      (type_arguments
+        (type_query
+          (call_expression
+            (import)
+            (arguments
+              (string
+                (string_fragment))))))
+      (arguments
+        (identifier))))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (binary_expression
+        (identifier)
+        (member_expression
+          (call_expression
+            (import)
+            (arguments
+              (string
+                (string_fragment))))
+          (property_identifier))))))
+
+================================================================================
+Awaited generic calls
+================================================================================
+
+await f<T>(x);
+await a.b<T>(x).c();
+await f<Record<string, number>>(x);
+const r = await a < b;
+
+--------------------------------------------------------------------------------
+
+(program
+  (expression_statement
+    (await_expression
+      (call_expression
+        (identifier)
+        (type_arguments
+          (type_identifier))
+        (arguments
+          (identifier)))))
+  (expression_statement
+    (await_expression
+      (call_expression
+        (member_expression
+          (call_expression
+            (member_expression
+              (identifier)
+              (property_identifier))
+            (type_arguments
+              (type_identifier))
+            (arguments
+              (identifier)))
+          (property_identifier))
+        (arguments))))
+  (expression_statement
+    (await_expression
+      (call_expression
+        (identifier)
+        (type_arguments
+          (generic_type
+            (type_identifier)
+            (type_arguments
+              (predefined_type)
+              (predefined_type))))
+        (arguments
+          (identifier)))))
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (binary_expression
+        (await_expression
+          (identifier))
+        (identifier)))))
+
+================================================================================
+Tagged templates with type arguments
+================================================================================
+
+const A = styled.div<{ $b: boolean }>`
+  color: ${p => p.$b};
+`;
+f<T>`x`;
+
+--------------------------------------------------------------------------------
+
+(program
+  (lexical_declaration
+    (variable_declarator
+      (identifier)
+      (call_expression
+        (member_expression
+          (identifier)
+          (property_identifier))
+        (type_arguments
+          (object_type
+            (property_signature
+              (property_identifier)
+              (type_annotation
+                (predefined_type)))))
+        (template_string
+          (string_fragment)
+          (template_substitution
+            (arrow_function
+              (identifier)
+              (member_expression
+                (identifier)
+                (property_identifier))))
+          (string_fragment)))))
+  (expression_statement
+    (call_expression
+      (identifier)
+      (type_arguments
+        (type_identifier))
+      (template_string
+        (string_fragment)))))

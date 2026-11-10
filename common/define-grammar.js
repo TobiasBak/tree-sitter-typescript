@@ -63,18 +63,17 @@ module.exports = function defineGrammar(dialect) {
       [$.decorator_call_expression, $.decorator],
       [$.literal_type, $.pattern],
       [$.predefined_type, $.pattern],
-      [$.call_expression, $._type_query_call_expression],
-      [$.call_expression, $._type_query_call_expression_in_type_annotation],
       [$.new_expression, $.primary_expression],
       [$.meta_property, $.primary_expression],
       [$.construct_signature, $._property_name],
     ]),
 
     conflicts: ($, previous) => previous.concat([
-      [$.call_expression, $.instantiation_expression, $.binary_expression],
-      [$.call_expression, $.instantiation_expression, $.binary_expression, $.unary_expression],
-      [$.call_expression, $.instantiation_expression, $.binary_expression, $.update_expression],
-      [$.call_expression, $.instantiation_expression, $.binary_expression, $.await_expression],
+      [$.instantiation_expression, $.binary_expression, $.await_expression],
+      [$.call_expression, $.new_expression],
+      [$.call_expression, $.expression],
+      [$.call_expression, $._type_query_call_expression],
+      [$.call_expression, $._type_query_call_expression_in_type_annotation],
 
       // This appears to be necessary to parse a parenthesized class expression
       [$.class],
@@ -170,11 +169,36 @@ module.exports = function defineGrammar(dialect) {
         field('body', $.statement_block),
       ),
 
+      _jsx_string: $ => choice(
+        seq(
+          '"',
+          repeat(choice(
+            alias($.unescaped_double_jsx_string_fragment, $.string_fragment),
+            $.html_character_reference,
+            alias(token.immediate('&'), $.string_fragment),
+          )),
+          '"',
+        ),
+        seq(
+          '\'',
+          repeat(choice(
+            alias($.unescaped_single_jsx_string_fragment, $.string_fragment),
+            $.html_character_reference,
+            alias(token.immediate('&'), $.string_fragment),
+          )),
+          '\'',
+        ),
+      ),
+
       call_expression: $ => choice(
         prec('call', seq(
           field('function', choice($.expression, $.import)),
-          field('type_arguments', optional($.type_arguments)),
           field('arguments', $.arguments),
+        )),
+        prec.dynamic(1, seq(
+          field('function', choice($.primary_expression, $.import)),
+          field('type_arguments', $.type_arguments),
+          field('arguments', choice($.arguments, $.template_string)),
         )),
         prec('template_call', seq(
           field('function', choice($.primary_expression, $.new_expression)),
@@ -191,7 +215,7 @@ module.exports = function defineGrammar(dialect) {
       new_expression: $ => prec.right('new', seq(
         'new',
         field('constructor', $.primary_expression),
-        field('type_arguments', optional($.type_arguments)),
+        field('type_arguments', optional(prec.dynamic(2, $.type_arguments))),
         field('arguments', optional($.arguments)),
       )),
 
@@ -1003,7 +1027,7 @@ module.exports = function defineGrammar(dialect) {
       ),
 
       type_parameter: $ => seq(
-        optional('const'),
+        repeat(choice('const', 'in', 'out')),
         field('name', $._type_identifier),
         field('constraint', optional($.constraint)),
         field('value', optional($.default_type)),
